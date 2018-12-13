@@ -1,0 +1,14 @@
+# use with `pip install -r requirements.txt`
+
+numpy
+scipy
+networkx
+nose
+jupyter
+pygraphviz
+cvxpy
+polytope
+control
+matplotlib
+matplotlib2tikz
+sparse
