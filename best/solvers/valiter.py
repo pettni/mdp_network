@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 from best import DTYPE, DTYPE_ACTION, DTYPE_OUTPUT
-from best.policies.dense_policies import LTL_Policy
+from best.policies.dense import LTL_Policy
 from best.logic.translate import formula_to_pomdp
 
 def solve_reach(network, accept, horizon=np.Inf, delta=0, prec=1e-5, verbose=False):

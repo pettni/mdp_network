@@ -1,8 +1,8 @@
 
 class InfiniteHorizonPolicy(object):
 
-  def __init__(self, pol):
-    self.pol = pol
+  def __init__(self, P_xu, N, M):
+    self.P_xu = P_xu
 
 
 class LTL_Policy(object):

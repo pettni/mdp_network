@@ -219,7 +219,7 @@ class POMDP:
       self._Tmat_csr[key_m] = norms_mat.dot(new_mat)
 
   def bellman(self, W, d=0):
-    '''calculate Q function via one Bellman step
+    '''calculate Q function via one Bellman step over dimension d
        Q(u, x) = \sum_x' T(x' | x, u) W(x')  '''
     Q = np.zeros(self.M + W.shape, dtype=DTYPE)
     for m_tuple in product(*[list(range(k)) for k in self.M]):
