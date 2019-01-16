@@ -4,6 +4,7 @@ import copy
 import numpy as np
 
 from best import DTYPE, DTYPE_ACTION, DTYPE_OUTPUT
+from best.policies.dense_policies import LTL_Policy
 from best.logic.translate import formula_to_pomdp
 
 def solve_reach(network, accept, horizon=np.Inf, delta=0, prec=1e-5, verbose=False):
@@ -98,7 +99,7 @@ def solve_reach_constrained(network, accept, constraints=[], horizon=np.Inf, del
   return val_list, pol_list
 
 
-def solve_min_cost(network, costs, target, M=np.Inf, prec=1e-5, verbose =False):
+def solve_ssp(network, costs, target, M=np.Inf, prec=1e-5, verbose =False):
   '''minimize expected cost to reach target set
       
       min   E( \sum_{t=0}^T costs(u(t), x(t)) )
@@ -191,41 +192,3 @@ def solve_ltl_cosafe(network, formula, predicates, delta=0., horizon=np.Inf, ver
   
   return LTL_Policy(dfsa.input_names, dfsa._Tmat_csr, list(dfsa_init)[0], dfsa_final, val, pol)
 
-
-class LTL_Policy(object):
-  """control policy"""
-  def __init__(self, proplist, dfsa_Tlist, dfsa_init, dfsa_final, val, pol):
-    '''create a control policy object'''
-    self.proplist = proplist
-    self.dfsa_Tlist = dfsa_Tlist
-    self.dfsa_init = dfsa_init
-    self.dfsa_final = dfsa_final
-    self.val = val
-    self.pol = pol
-
-    self.dfsa_state = self.dfsa_init
-
-  def reset(self):
-    '''reset controller'''
-    self.dfsa_state = self.dfsa_init
-
-  def report_aps(self, aps):
-    '''report atomic propositions to update internal controller state'''
-    dfsa_action = tuple(int(ap in aps) for ap in self.proplist)
-    row = self.dfsa_Tlist[dfsa_action].getrow(self.dfsa_state)
-    self.dfsa_state = row.indices[0]
-
-  def __call__(self, syst_state, t=0):
-    '''get input from policy'''
-    if t >= len(self.val)-1:
-      print('Warning: t={} larger than horizon {}. Setting t={}'.format(t, len(self.val)-1, len(self.val)-2))
-      t = len(self.val)-2
-    joint_state = tuple(syst_state) + (self.dfsa_state,)
-
-    u = tuple(self.pol[t][m][joint_state] for m in range(len(self.pol[t])))
-
-    return u, self.val[t][joint_state]
-
-  def finished(self):
-    '''check if policy reached target'''
-    return self.dfsa_state in self.dfsa_final

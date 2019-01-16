@@ -19,6 +19,7 @@ def test_grid():
 
 def test_grid_cdf_1d():
   Pvec = grid_cdf_1d(0, 1, -10, 10, 10)
+  print(Pvec)
   np.testing.assert_almost_equal(Pvec, [0.5, 0.5])
 
   Pvec = grid_cdf_1d(0, 1, 0, 0.4, 0.1)

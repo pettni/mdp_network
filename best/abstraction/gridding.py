@@ -287,16 +287,15 @@ def grid_cdf_1d(m, S, low, up, eta):
   '''compute how much of a 1D gaussian CDF that falls into cells on a grid
      returns p such that p[i] = P( low + eta*i <= x <= low + eta*(i+1)  ) for x ~ N(m, S)'''
 
-  N = np.round((up - low) / eta).astype(int)
+  edges = np.arange(low, up+eta/2, eta)
 
   if S < np.finfo(np.float32).eps:
     # no variance
-    Pvec = np.zeros(N)
+    Pvec = np.zeros(len(edges) - 1)
     if m > low and m < up: 
       Pvec[ int((m - low)/eta) ] = 1
   else:
     # there is variance
-    edges = np.linspace(low, up, N)
     Pvec = np.diff(norm.cdf(edges, m, S ** .5))
   return Pvec
 
@@ -311,7 +310,6 @@ def grid_cdf_nd(m_tuple, S_mat, low_tuple, up_tuple, eta_tuple):
   for m, S, low, up, eta in zip(m_tuple, S_mat.diagonal(), low_tuple, up_tuple, eta_tuple):
     ret = np.outer(ret, grid_cdf_1d(m, S, low, up, eta))
 
-  print(ret.shape)
   return ret
 
 def poly_ellipse_isect(x0, M, eps, poly):

@@ -3,7 +3,7 @@ import numpy as np
 from best.models.pomdp import POMDP, POMDPNetwork
 from best.solvers.valiter import *
 
-def test_costsolve1():
+def test_ssp_valiter1():
 
   T1 = np.array([[0, 0, 0, 1, 0],
                  [0, 1, 0, 0, 0],
@@ -28,11 +28,11 @@ def test_costsolve1():
 
   target = np.array([0, 0, 0, 0, 1])
 
-  val, pol = solve_min_cost(network, costs, target, M=1000)
+  val, pol = solve_ssp(network, costs, target, M=1000)
 
   np.testing.assert_almost_equal(val, [21, 26, 50, 20, 0])
 
-def test_costsolve2():
+def test_ssp_valiter2():
 
   T0 = np.array([[0.1, 0.9, 0], [0, 1, 0], [0, 0, 1]])
   network = POMDPNetwork([POMDP([T0])])
@@ -40,7 +40,7 @@ def test_costsolve2():
   costs = np.ones([1,3])
   target = np.array([0,1,0])
 
-  val, pol = solve_min_cost(network, costs, target, M=10)
+  val, pol = solve_ssp(network, costs, target, M=10)
 
   np.testing.assert_almost_equal(val, [1/0.9, 0, np.Inf], decimal=4)
 
