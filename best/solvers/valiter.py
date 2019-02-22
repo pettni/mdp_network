@@ -179,8 +179,10 @@ def solve_ltl_cosafe(network, formula, predicates, delta=0., horizon=np.Inf, ver
   network_copy = copy.deepcopy(network)
 
   network_copy.add_pomdp(dfsa)
+
   for ap, (outputs, conn) in predicates.items():
-    network_copy.add_connection(outputs, ap, conn)
+    if ap in dfsa.input_names:
+      network_copy.add_connection(outputs, ap, conn)
 
   Vacc = np.zeros(network_copy.N)
   Vacc[...,list(dfsa_final)[0]] = 1

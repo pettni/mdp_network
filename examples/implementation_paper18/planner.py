@@ -58,7 +58,7 @@ def plan_exploration(prob, rob_policy):
     costs = uav_prm.costs.reshape(uav_prm.costs.shape + (1,)*(1+len(uav_env_network.N) - 2))
 
 
-    val_uav, pol_uav = solve_min_cost(uav_env_network, costs, target, M=500, verbose=False)
+    val_uav, pol_uav = solve_ssp(uav_env_network, costs, target, M=500, verbose=False)
 
     return UAVPolicy(pol_uav, val_uav, uav_prm)
 
@@ -153,7 +153,8 @@ def environment_belief_model(p0, name):
                     [1-p0, 0, p0],
                     [0,    0,  1]]);
 
-  return POMDP([Tnone, Tmeas], input_names=[name+'_u'], state_name=name+'_b',
+  return POMDP([Tnone, Tmeas], input_names=[name+'_u'], state_name=name,
+               output_name=name + '_b',
                output_trans=lambda s: [0, p0, 1][s])
 
 def get_predicates(regions):
@@ -172,14 +173,13 @@ def get_predicates(regions):
 
     predicates['fail'] = (risk_inputs, partial(risk_predicate, risk_names))
 
-  # sample predicates
   sample_types = set([name[0] for name in regions.keys()]) - set('r')
 
   for reg_type in sample_types:
     type_names = list(filter(lambda name: name[0] == reg_type, regions.keys()))
     type_inputs = ['c_x'] + ['{}_b'.format(name) for name in type_names]
 
-    # Use functools.partial to avoid using same reg_type for all predicates
+    # sampleX: there is a region and robot is inside
     def type_predicate(names, rx, *nargs):
       conds = [is_adjacent(regions[name][0], rx, 0) and nargs[i] == 1  
                for (i, name) in enumerate(names)]
@@ -187,6 +187,27 @@ def get_predicates(regions):
 
     ap_name = 'sample{}'.format(reg_type.upper())
     predicates[ap_name] = (type_inputs, partial(type_predicate, type_names))
+
+  for reg_type in sample_types:
+      type_names = list(filter(lambda name: name[0] == reg_type, regions.keys()))
+      type_inputs = ['{}_b'.format(name) for name in type_names]
+      
+      # emptyX: there is no region of that type
+      def empty_predicate(names, *nargs):
+          conds = [nargs[i] == 0 for (i, _) in enumerate(names)]
+          return {all(conds)}
+
+      ap_name = 'empty{}'.format(reg_type.upper())
+      predicates[ap_name] = (type_inputs, partial(empty_predicate, type_names))
+
+      # exploreX: It is resolved whether that region exists
+      def explore_predicate(names, *nargs):
+          conds = [nargs[i] == 0 or nargs[i] == 1 for (i, _) in enumerate(names)]
+          return {all(conds)}    
+      
+      ap_name = 'explore{}'.format(reg_type.upper())
+      predicates[ap_name] = (type_inputs, partial(explore_predicate, type_names))
+
 
   return predicates
 
