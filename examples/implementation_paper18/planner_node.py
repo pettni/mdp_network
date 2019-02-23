@@ -4,6 +4,8 @@ import struct
 import numpy as np
 import time
 
+import matplotlib.pyplot as plt
+
 import rospy
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float32
@@ -13,10 +15,9 @@ from policies import *
 from rob_interface import RobCMD
 from uav_interface import UAVCMD
 
-if False:
-  from prob_simple import get_prob
-else:
-  from prob_cast import get_prob
+# from prob_simple import get_prob
+# from prob_cast import get_prob
+from prob_gradual import get_prob
 
 SIM = True
 
@@ -252,7 +253,9 @@ class Planner(object):
 
 
 def main():
-  plot_problem(prob)
+  ax = plt.gca()
+  plot_problem(prob, ax)
+  plt.show()
 
   rob_cmd = RobCMD()
   uav_cmd = UAVCMD(UDP_IP, UDP_PORT)

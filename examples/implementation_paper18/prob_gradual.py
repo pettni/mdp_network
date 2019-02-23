@@ -18,9 +18,9 @@ def get_prob():
   prob['xmax'] = [10, 10]
   prob['discretization'] = [10, 10]
 
-  prob['cas_x0'] = np.array([0.5, 0.5])
-  prob['uav_x0'] = np.array([0.5, 0.5])
-  prob['uav_xT'] = np.array([0.5, 0.5])
+  prob['cas_x0'] = np.array([0.25, 0.25])
+  prob['uav_x0'] = np.array([0.25, 0.25])
+  prob['uav_xT'] = np.array([0.25, 0.25])
 
   regs = OrderedDict()
   regs['a1'] = (pc.box2poly(np.array([[6, 7], [2, 3]])), 0.6, 'green')

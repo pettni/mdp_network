@@ -1,26 +1,19 @@
+import struct
+
 import rospy
-from cyberpod_ros.msg import command
-from cyberpod_ros.srv import params, paramsRequest, paramsResponse
+from ambercortex_ros.msg import cmd
 
 class RobCMD:
 
   def __init__(self):
-    self.pub = rospy.Publisher('cyberpod_cmd_throttled', command, queue_size=10)
-    self.srv = rospy.ServiceProxy('cyberpod_params', params)
+    self.pub = rospy.Publisher('cyberpod/cmd', cmd, queue_size=10)
 
   def goto(self, x, y):
-    msg = command([x, y, 1.])
+    byte_content = list(struct.pack('ff', x, y))
+    chksum = sum(byte_content) % 256
+    msg = cmd(data=byte_content, chksum=chksum)
     self.pub.publish(msg)
 
   def hold(self):
-    msg = command([0., 0., 0.])
+    msg = cmd([0., 0., 0.])
     self.pub.publish(msg)
-
-  def set_run(self):
-    self.srv(paramsRequest(5, 2, [0.]*20))
-
-  def set_idle(self):
-    self.srv(paramsRequest(5, 1, [0.]*20))
-
-  def set_failure(self):
-    self.srv(paramsRequest(5, 0, [0.]*20))

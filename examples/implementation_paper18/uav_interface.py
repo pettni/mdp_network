@@ -5,7 +5,7 @@ import numpy as np
 import matlab.engine
 from geometry_msgs.msg import Pose2D
 
-MATLAB_QUADROTOR_PATH = r'/mnt/c/Users/petter/coding/quadrotor/lib'
+MATLAB_QUADROTOR_PATH = r'/home/petter/coding/quadrotor/lib'
 
 def fit_poly_matlab(eng, t_ivals, xyz_ivals):
   t_ivals_m = matlab.double(list(t_ivals))
@@ -25,11 +25,6 @@ def fit_poly_matlab(eng, t_ivals, xyz_ivals):
   cmd_b = struct.pack('{}B'.format(len(udp_message)), *udp_message)
 
   return cmd_b
-
-def compute_ckhsum(msg):
-  '''compute checksum for bytearray'''
-  chksum = struct.pack('B', sum(msg) % 256)
-  return chksum
 
 def rob_to_platform(rob_pose):
   x = rob_pose[0] - 0.07 * np.cos(rob_pose[2])
@@ -69,8 +64,7 @@ class UAVCMD:
 
     udp_content = struct.pack('BB', ord(cmd_type), self.cmd_nr) \
                   + struct.pack('I', len(cmd_b)) + cmd_b + b'\x00\x00'
-    udp_chksum = compute_ckhsum(udp_header + udp_content)
-
+    udp_chksum = struct.pack('B', sum(udp_header + udp_content) % 256)
     udp_msg = struct.pack('B', ord('F')) + udp_header + udp_content + udp_chksum
     self.sock.sendto(udp_msg, (self.IP, self.PORT));
     self.cmd_nr = (self.cmd_nr + 1) % 256
