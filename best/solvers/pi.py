@@ -14,6 +14,12 @@ def bellman_policy(network, W, P_ux):
     V_xx = np.diagonal(V_xx, axis1=0, axis2=len(network.N)-n)
   return V_xx
 
+def just_one_one(row):
+  idx = np.nonzero(row)
+  ret = np.zeros(row.shape)
+  ret[idx[0][0]] = 1
+  return ret
+
 def PI(network, accept, prec=1e-5, verbose=False):
   '''solve problem 
       max   P( x(t) \in accept )
@@ -21,23 +27,33 @@ def PI(network, accept, prec=1e-5, verbose=False):
 
   it = 0
   start = time.time()
-
+  np.set_printoptions(precision=2, floatmode='fixed')
   V_x = np.zeros(network.N)
 
+  dumb = False
+
   while True:
+
+    print("iteration", it, ": ", V_x)
 
     # policy improvement
     Q_ux = network.bellman(V_x)
     V_x_max = np.amax(Q_ux, keepdims=1, axis=tuple(range(len(network.M))))
 
-    # uniform over all close to argmax
-    P_ux = np.greater_equal(Q_ux, V_x_max - prec, dtype=DTYPE)
-    P_ux = P_ux / np.sum(P_ux, keepdims=1, axis=tuple(range(len(network.M))))
+    if not dumb:
+      # uniform distribution over all close to argmax
+      P_ux = np.greater_equal(Q_ux, V_x_max - prec, dtype=DTYPE)
+      P_ux = P_ux / np.sum(P_ux, keepdims=1, axis=tuple(range(len(network.M))))
+    else:
+      # all maximizing actions
+      P_ux = (Q_ux == V_x_max).reshape(prod(network.M), prod(network.N))
+      # pick just one (the first)
+      P_ux = np.apply_along_axis(just_one_one, 0, P_ux) 
 
     # policy evaluation
     V_x_new = policy_evaluation(network, accept, P_ux, prec=prec, verbose=False)
 
-    if np.amax(V_x_new - V_x) < prec:
+    if (not dumb and np.amax(V_x_new - V_x) < prec) or (dumb and it > 20):
       break
 
     V_x = V_x_new

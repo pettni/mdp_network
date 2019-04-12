@@ -170,6 +170,8 @@ class Fsa(object):
       tf.write(bytes(scheck_formula).encode("utf-8")) 
     tf.flush()
 
+    print(scheck_formula)
+    
     # Execute scheck and get output
     try:
       lines = subp.check_output([scheck_binary, '-s', '-d', tf.name]).splitlines()
