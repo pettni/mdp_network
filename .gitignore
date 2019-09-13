@@ -108,3 +108,5 @@ ENV/
 **/.idea
 
 examples/**/*.txt
+
+**.sublime-workspace

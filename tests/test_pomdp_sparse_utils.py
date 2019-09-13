@@ -34,7 +34,7 @@ def test_propagate_distr():
   D4_xz = propagate_distribution(pomdp, D4_ux)
   np.testing.assert_almost_equal(D4_xz.todense(), 0.33 * D1_xz_r + 0.33 * D2_xz_r + 0.34 * D3_xz_r)
 
-def test_diag():
+def test_diagonal():
 
   dA = np.random.rand(5,5)
   sA = sparse.COO(dA)
@@ -87,3 +87,41 @@ def test_evaluate_Q():
   V = np.array([[0,0,0], [0,0,0], [0,0,1]])
 
   np.testing.assert_almost_equal(evaluate_Q(network, (0,), (0,0), V), 0.5)
+
+def test_diag():
+
+  T1 = sparse.COO([[0, 1, 2]], [1, 2, 3], shape=(3))
+
+  T2 = diag(T1, axis=0)
+
+  np.testing.assert_equal(T2.shape, (3,3))
+
+  np.testing.assert_almost_equal(T2.todense(), np.diag([1,2,3]))
+
+  T1 = sparse.COO.from_numpy(np.array([[1, 2, 3, 4], [5, 6, 7, 8]]))
+  T2 = diag(T1, axis=1)
+
+  np.testing.assert_equal(T2.shape, (2,4,4))
+
+  np.testing.assert_almost_equal(T2.todense(), np.array([[[1, 0, 0, 0],
+                                     [0, 2, 0, 0],
+                                     [0, 0, 3, 0],
+                                     [0, 0, 0, 4]],
+                                    [[5, 0, 0, 0],
+                                     [0, 6, 0, 0],
+                                     [0, 0, 7, 0],
+                                     [0, 0, 0, 8]]]))  
+
+
+def test_diagsum():
+  # test that T_{xux'} V_xu = sum(V_xu, u)  for appropriately constructed tensor T
+  dx = 17
+  dy = 12
+
+  v = np.random.rand(dx,dy)
+
+  t = sparse.tensordot(sparse.COO.from_numpy(np.ones(dy)), sparse.eye(dx), axes=-1).transpose([1, 0, 2])
+
+  w = sparse.tensordot(t, v, axes=[[2, 1], [0, 1]])
+
+  np.testing.assert_almost_equal(w, v.sum(axis=1))

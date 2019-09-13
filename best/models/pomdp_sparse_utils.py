@@ -21,10 +21,20 @@ def diagonal(a, axis1, axis2):
   return sparse.COO(new_coord, new_data, new_shape)
 
 
-def diag(a, axes):
-  '''diagonalize axis by inserting new dimension at the end'''
-  raise NotImplementedError
+def diag(a, axis):
+  '''diagonalize axis by inserting new dimension at the end
+    Analogous to tf.diag'''
+  new_shape = a.shape + (a.shape[axis],)
+  new_coord = np.vstack([a.coords, a.coords[axis]])
+  return sparse.COO(new_coord, a.data, new_shape)
 
+
+def get_T_uxXz(pomdp):
+  return sparse.stack([sparse.stack([sparse.COO(pomdp.Tuz(m_tuple, z)) 
+                                       for z in range(pomdp.O)],
+                                      axis=-1)
+                         for m_tuple in pomdp.m_tuple_iter()]) \
+           .reshape(pomdp.M + (pomdp.N, pomdp.N, pomdp.O))
 
 def propagate_distribution(pomdp, D_ux, u_dim=None, x_dim=None):
   '''evolve input/state distribution D_ux into output distribution D_xz
@@ -43,11 +53,7 @@ def propagate_distribution(pomdp, D_ux, u_dim=None, x_dim=None):
   if len(D_ux.shape) <= max(u_dim + x_dim) or len(set(u_dim + x_dim)) < len(u_dim + x_dim) or sum(D_ux.data) != 1:
       raise Exception('D_ux not a valid distribution')
     
-  T_uxXz = sparse.stack([sparse.stack([sparse.COO(pomdp.Tuz(m_tuple, z)) 
-                                       for z in range(pomdp.O)],
-                                      axis=-1)
-                         for m_tuple in pomdp.m_tuple_iter()]) \
-           .reshape(pomdp.M + (pomdp.N, pomdp.N, pomdp.O))
+  T_uxXz = get_T_uxXz(pomdp)
   
   T_zx = sparse.tensordot(D_ux, T_uxXz, axes=(u_dim + x_dim, range(len(pomdp.M)+1))  )
   
