@@ -7,10 +7,7 @@ import numpy as np
 import sparse
 import scipy.sparse as sp
 
-from best.models.pomdp import POMDP, POMDPNetwork
 from best.models.pomdp_sparse_utils import *
-from best.solvers.valiter import *
-
 from best.solvers.optimization_wrappers import Constraint, solve_ilp
 
 

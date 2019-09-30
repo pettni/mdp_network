@@ -2,6 +2,7 @@ import numpy as np
 import sparse
 from best.models.pomdp import POMDP, POMDPNetwork
 from best.solvers.occupation_lp import *
+from best.solvers.valiter import *
 
 def test_occupation1():
 

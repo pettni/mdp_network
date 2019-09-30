@@ -110,3 +110,4 @@ ENV/
 examples/**/*.txt
 
 **.sublime-workspace
+**.sublime-project
