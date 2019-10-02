@@ -9,16 +9,14 @@ def diagonal(a, axis1, axis2):
   if a.shape[axis1] != a.shape[axis2]:
     raise Exception('dimensions must agree for diagonal')
 
-  new_axis_order = [axis for axis in range(len(a.shape)) if axis != axis1 and axis != axis2] + [axis1]
+  new_axis_order = np.array([axis for axis in range(len(a.shape)) if axis != axis1 and axis != axis2] + [axis1])
 
   new_shape = [a.shape[axis] for axis in new_axis_order]
 
-  idx_diag = [i for i in range(len(a.data)) if a.coords[axis1][i] == a.coords[axis2][i]]
+  idx_diag = a.coords[axis1] == a.coords[axis2]
+  crds = a.coords[:, idx_diag]
 
-  new_coord = [[a.coords[axis][i] for i in idx_diag] for axis in new_axis_order]
-  new_data  = [a.data[i] for i in idx_diag]
-
-  return sparse.COO(new_coord, new_data, new_shape)
+  return sparse.COO(crds[new_axis_order, :], a.data[idx_diag], new_shape)
 
 
 def diag(a, axis):
