@@ -28,16 +28,3 @@ Run tests:
 To use ROS-based controllers, in addition these packages are needed
 
     pip install rospkg catkin-tools pyyaml
-
-
-# TODO
-
- - Base class for policies, solvers return subclasses
- - Competing types of value iteration: 
-    * [x] sparse tables (for MDPs)
-    * [ ] mtBDD? (for MDPs)
-    * [ ] VDC
-    * [ ] DQN via openai.baseline
-    * [ ] pbVI by converting Rohan's code?
-
-
